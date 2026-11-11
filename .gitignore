@@ -1,0 +1,26 @@
+# Python keš i bajt kod
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Paketi i arhive (koje ne želiš da kačiš u izvorni kod)
+*.tar.gz
+*.zip
+dist/
+build/
+pkg/
+src/
+
+# IDE i editori
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS fajlovi
+.DS_Store
+Thumbs.db

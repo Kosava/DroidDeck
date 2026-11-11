@@ -1,0 +1,33 @@
+/*
+ * DroidDeck — polkit pravilo.
+ *
+ * Dozvoljava BEZ LOZINKE samo ove tačne komande, i to samo korisniku koji
+ * sedi za računarom (aktivna lokalna sesija):
+ *
+ *   pkexec /usr/bin/systemctl start waydroid-container
+ *   pkexec /usr/bin/waydroid shell -- am force-stop <naziv.paketa>
+ *   pkexec /usr/bin/waydroid shell -- input keyevent 3|4|187   (Početna/Nazad/Aplikacije)
+ *
+ * Sve ostalo (waydroid init, ARM skripta, bilo koja druga komanda) i dalje
+ * traži lozinku. Uklanjanje: obriši ovaj fajl (ili  sudo pacman -R droiddeck).
+ */
+polkit.addRule(function (action, subject) {
+    if (action.id !== "org.freedesktop.policykit.exec")
+        return polkit.Result.NOT_HANDLED;
+    if (!subject.local || !subject.active)
+        return polkit.Result.NOT_HANDLED;
+    if (action.lookup("user") && action.lookup("user") !== "root")
+        return polkit.Result.NOT_HANDLED;
+
+    var cmd = action.lookup("command_line") || "";
+    var allowed = [
+        /^\/usr\/bin\/systemctl start waydroid-container$/,
+        /^\/usr\/bin\/waydroid shell -- am force-stop [A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$/,
+        /^\/usr\/bin\/waydroid shell -- input keyevent (3|4|187)$/
+    ];
+    for (var i = 0; i < allowed.length; i++) {
+        if (allowed[i].test(cmd))
+            return polkit.Result.YES;
+    }
+    return polkit.Result.NOT_HANDLED;
+});
